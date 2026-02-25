@@ -1,0 +1,27 @@
+services:
+  capture:
+    build: .
+    command: python3 capture_screenshot.py
+    volumes:
+      - ./screenshots:/app/screenshots
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  cleanup:
+    build: .
+    command: python3 cleanup_screenshots.py
+    volumes:
+      - ./screenshots:/app/screenshots
+    env_file:
+      - .env
+    restart: unless-stopped
+
+  telegram:
+    build: .
+    command: python3 telegram_sender.py
+    volumes:
+      - ./screenshots:/app/screenshots
+    env_file:
+      - .env
+    restart: unless-stopped
