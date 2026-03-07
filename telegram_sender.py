@@ -2,6 +2,7 @@
 
 import os
 import time
+import asyncio
 from datetime import datetime
 
 from telegram import Bot
@@ -22,7 +23,7 @@ def get_unsent_screenshots():
 
 def send_screenshot(bot, chat_id, file_path):
     with open(file_path, "rb") as photo:
-        bot.send_photo(chat_id=chat_id, photo=photo)
+         asyncio.run(bot.send_photo(chat_id=chat_id, photo=photo))
     print(f"Sent: {os.path.basename(file_path)}")
 
 def main():
@@ -31,7 +32,6 @@ def main():
         return
     
     bot = Bot(token=TELEGRAM_BOT_TOKEN)
-    sent_today = set()
     
     while True:
         try:
@@ -40,16 +40,11 @@ def main():
             
             for filename in screenshots:
                 file_path = os.path.join(OUTPUT_DIR, filename)
-                file_date = filename.split("_")[1][:8]
-                
-                if file_date == today and filename in sent_today:
-                    continue
                 
                 try:
                     send_screenshot(bot, TELEGRAM_CHAT_ID, file_path)
                     os.remove(file_path)
-                    print(f"Deleted: {filename}")
-                    sent_today.add(filename)
+                    print(f"Sent and deleted: {filename}")
                 except TelegramError as e:
                     print(f"Failed to send {filename}: {e}")
                 except Exception as e:
